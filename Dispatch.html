@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Dispatch de Camions de Ciment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #eaf2f8;
+            border-radius: 4px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #d5d8dc;
+        }
+        .result-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #3498db;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #ecf0f1;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculateur de Dispatch de Camions de Ciment</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="calculator">Calculateur</div>
+            <div class="tab" data-tab="help">Aide & Instructions</div>
+        </div>
+        
+        <div class="tab-content active" id="calculator">
+            <div class="form-group">
+                <label for="arrivalTime">Heure d'arrivée prévue sur le chantier (format 24h)</label>
+                <input type="time" id="arrivalTime" value="07:00">
+            </div>
+            
+            <div class="form-group">
+                <label for="cementQuantity">Quantité de ciment (m³)</label>
+                <input type="number" id="cementQuantity" value="0" min="0" step="0.1">
+            </div>
+            
+            <div class="form-group">
+                <label for="travelTime">Temps estimé pour un trajet (minutes)</label>
+                <input type="number" id="travelTime" value="0" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="truckCapacity">Capacité d'un camion (m³)</label>
+                <input type="number" id="truckCapacity" value="8" min="0" step="0.1">
+            </div>
+            
+            <div class="form-group">
+                <label for="loadingTime">Temps de chargement (minutes)</label>
+                <input type="number" id="loadingTime" value="15" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="unloadingTime">Temps de déchargement et lavage (minutes par camion)</label>
+                <input type="number" id="unloadingTime" value="30" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="truckInterval">Intervalle entre les départs des camions (minutes)</label>
+                <input type="number" id="truckInterval" value="15" min="0">
+            </div>
+            
+            <button id="calculate">Calculer</button>
+            
+            <div class="results" id="results">
+                <div class="result-row">
+                    <span class="result-label">Nombre de camions nécessaires:</span>
+                    <span class="result-value" id="truckCount">0</span>
+                </div>
+                
+                <div class="result-row">
+                    <span class="result-label">Temps pour un aller-retour complet (par camion):</span>
+                    <span class="result-value" id="roundTripTime">0:00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span class="result-label">Heure de chargement du premier camion:</span>
+                    <span class="result-value" id="firstLoadingTime">0:00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span class="result-label">Durée totale de l'opération:</span>
+                    <span class="result-value" id="totalOperationTime">0:00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span class="result-label">Heure estimée de fin des travaux:</span>
+                    <span class="result-value" id="estimatedEndTime">00:00</span>
+                </div>
+                
+                <h3>Détail des camions</h3>
+                <div id="truckDetails"></div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="help">
+            <h2>Instructions d'utilisation</h2>
+            <p><strong>Heure d'arrivée:</strong> L'heure à laquelle les camions doivent arriver sur le chantier.</p>
+            <p><strong>Quantité de ciment:</strong> Volume total de ciment à livrer en mètres cubes.</p>
+            <p><strong>Temps estimé pour un trajet:</strong> Temps en minutes pour qu'un camion fasse le trajet aller (ou retour) entre le dépôt et le chantier.</p>
+            <p><strong>Capacité d'un camion:</strong> Volume maximum de ciment qu'un camion peut transporter (par défaut 8 m³).</p>
+            <p><strong>Temps de chargement:</strong> Temps nécessaire pour charger un camion avant son départ (par défaut 15 minutes).</p>
+            <p><strong>Temps de déchargement et lavage:</strong> Temps nécessaire pour décharger le ciment et laver le camion sur le chantier (par défaut 30 minutes).</p>
+            <p><strong>Intervalle entre les départs:</strong> Temps d'attente entre les départs successifs des camions (par défaut 15 minutes).</p>
+            
+            <h3>Formules utilisées:</h3>
+            <p><strong>Nombre de camions</strong> = Plafond(Quantité de ciment / Capacité d'un camion)</p>
+            <p><strong>Temps aller-retour</strong> = (Temps trajet × 2) + Temps déchargement</p>
+            <p><strong>Heure chargement premier camion</strong> = Heure d'arrivée - Temps trajet - Temps chargement</p>
+            <p><strong>Durée totale</strong> = ((Nombre de camions - 1) × Intervalle) + Temps aller-retour</p>
+            <p><strong>Heure de fin</strong> = Heure d'arrivée + Durée totale</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Calculate button functionality
+            document.getElementById('calculate').addEventListener('click', function() {
+                calculateDispatch();
+            });
+            
+            // Initial calculation
+            calculateDispatch();
+            
+            function calculateDispatch() {
+                // Get input values
+                const arrivalTime = document.getElementById('arrivalTime').value;
+                const cementQuantity = parseFloat(document.getElementById('cementQuantity').value);
+                const travelTime = parseInt(document.getElementById('travelTime').value);
+                const truckCapacity = parseFloat(document.getElementById('truckCapacity').value);
+                const loadingTime = parseInt(document.getElementById('loadingTime').value);
+                const unloadingTime = parseInt(document.getElementById('unloadingTime').value);
+                const truckInterval = parseInt(document.getElementById('truckInterval').value);
+                
+                // Calculate number of trucks needed
+                const truckCount = Math.ceil(cementQuantity / truckCapacity);
+                
+                // Calculate round trip time (travel time * 2 + unloading time)
+                const roundTripMinutes = travelTime * 2 + unloadingTime;
+                const roundTripHours = Math.floor(roundTripMinutes / 60);
+                const roundTripMins = roundTripMinutes % 60;
+                const roundTripTimeFormatted = `${roundTripHours}:${roundTripMins.toString().padStart(2, '0')}`;
+                
+                // Calculate first loading time
+                const arrivalTimeParts = arrivalTime.split(':').map(part => parseInt(part));
+                let loadingTimeMinutes = arrivalTimeParts[0] * 60 + arrivalTimeParts[1] - travelTime - loadingTime;
+                if (loadingTimeMinutes < 0) loadingTimeMinutes += 24 * 60; // Handle wraparound to previous day
+                const loadingTimeHours = Math.floor(loadingTimeMinutes / 60);
+                const loadingTimeMins = loadingTimeMinutes % 60;
+                const firstLoadingTimeFormatted = `${loadingTimeHours}:${loadingTimeMins.toString().padStart(2, '0')}`;
+                
+                // Calculate total operation time
+                const totalOperationMinutes = ((truckCount - 1) * truckInterval) + roundTripMinutes;
+                const totalOperationHours = Math.floor(totalOperationMinutes / 60);
+                const totalOperationMins = totalOperationMinutes % 60;
+                const totalOperationTimeFormatted = `${totalOperationHours}:${totalOperationMins.toString().padStart(2, '0')}`;
+                
+                // Calculate estimated end time
+                const endTimeMinutes = arrivalTimeParts[0] * 60 + arrivalTimeParts[1] + totalOperationMinutes;
+                const endTimeHours = Math.floor(endTimeMinutes / 60) % 24;
+                const endTimeMins = endTimeMinutes % 60;
+                const estimatedEndTimeFormatted = `${endTimeHours}:${endTimeMins.toString().padStart(2, '0')}`;
+                
+                // Update results
+                document.getElementById('truckCount').textContent = truckCount;
+                document.getElementById('roundTripTime').textContent = roundTripTimeFormatted;
+                document.getElementById('firstLoadingTime').textContent = firstLoadingTimeFormatted;
+                document.getElementById('totalOperationTime').textContent = totalOperationTimeFormatted;
+                document.getElementById('estimatedEndTime').textContent = estimatedEndTimeFormatted;
+                
+                // Generate truck details
+                const truckDetailsElement = document.getElementById('truckDetails');
+                truckDetailsElement.innerHTML = '';
+                
+                const truckDetailsTable = document.createElement('table');
+                truckDetailsTable.style.width = '100%';
+                truckDetailsTable.style.borderCollapse = 'collapse';
+                truckDetailsTable.style.marginTop = '10px';
+                
+                // Create header row
+                const headerRow = document.createElement('tr');
+                const headers = ['Camion #', 'Chargement', 'Arrivée', 'Départ', 'Retour'];
+                
+                headers.forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.textContent = headerText;
+                    th.style.padding = '8px';
+                    th.style.borderBottom = '2px solid #ddd';
+                    th.style.textAlign = 'left';
+                    headerRow.appendChild(th);
+                });
+                
+                truckDetailsTable.appendChild(headerRow);
+                
+                // Create truck detail rows
+                for (let i = 0; i < truckCount; i++) {
+                    const truckRow = document.createElement('tr');
+                    
+                    // Truck number
+                    const truckNumberCell = document.createElement('td');
+                    truckNumberCell.textContent = i + 1;
+                    truckNumberCell.style.padding = '8px';
+                    truckNumberCell.style.borderBottom = '1px solid #ddd';
+                    truckRow.appendChild(truckNumberCell);
+                    
+                    // Loading time (first loading time + i * interval)
+                    const truckLoadingMinutes = loadingTimeMinutes + (i * truckInterval);
+                    const truckLoadingHours = Math.floor(truckLoadingMinutes / 60) % 24;
+                    const truckLoadingMins = truckLoadingMinutes % 60;
+                    const truckLoadingFormatted = `${truckLoadingHours}:${truckLoadingMins.toString().padStart(2, '0')}`;
+                    
+                    const loadingCell = document.createElement('td');
+                    loadingCell.textContent = truckLoadingFormatted;
+                    loadingCell.style.padding = '8px';
+                    loadingCell.style.borderBottom = '1px solid #ddd';
+                    truckRow.appendChild(loadingCell);
+                    
+                    // Arrival time (loading time + loading duration + travel time)
+                    const truckArrivalMinutes = truckLoadingMinutes + loadingTime + travelTime;
+                    const truckArrivalHours = Math.floor(truckArrivalMinutes / 60) % 24;
+                    const truckArrivalMins = truckArrivalMinutes % 60;
+                    const truckArrivalFormatted = `${truckArrivalHours}:${truckArrivalMins.toString().padStart(2, '0')}`;
+                    
+                    const arrivalCell = document.createElement('td');
+                    arrivalCell.textContent = truckArrivalFormatted;
+                    arrivalCell.style.padding = '8px';
+                    arrivalCell.style.borderBottom = '1px solid #ddd';
+                    truckRow.appendChild(arrivalCell);
+                    
+                    // Departure time (arrival time + unloading time)
+                    const truckDepartureMinutes = truckArrivalMinutes + unloadingTime;
+                    const truckDepartureHours = Math.floor(truckDepartureMinutes / 60) % 24;
+                    const truckDepartureMins = truckDepartureMinutes % 60;
+                    const truckDepartureFormatted = `${truckDepartureHours}:${truckDepartureMins.toString().padStart(2, '0')}`;
+                    
+                    const departureCell = document.createElement('td');
+                    departureCell.textContent = truckDepartureFormatted;
+                    departureCell.style.padding = '8px';
+                    departureCell.style.borderBottom = '1px solid #ddd';
+                    truckRow.appendChild(departureCell);
+                    
+                    // Return time (departure time + travel time)
+                    const truckReturnMinutes = truckDepartureMinutes + travelTime;
+                    const truckReturnHours = Math.floor(truckReturnMinutes / 60) % 24;
+                    const truckReturnMins = truckReturnMinutes % 60;
+                    const truckReturnFormatted = `${truckReturnHours}:${truckReturnMins.toString().padStart(2, '0')}`;
+                    
+                    const returnCell = document.createElement('td');
+                    returnCell.textContent = truckReturnFormatted;
+                    returnCell.style.padding = '8px';
+                    returnCell.style.borderBottom = '1px solid #ddd';
+                    truckRow.appendChild(returnCell);
+                    
+                    truckDetailsTable.appendChild(truckRow);
+                }
+                
+                truckDetailsElement.appendChild(truckDetailsTable);
+            }
+        });
+    </script>
+</body>
+</html>
