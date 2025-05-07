@@ -115,12 +115,12 @@
             
             <div class="form-group">
                 <label for="cementQuantity">Quantité de ciment (m³)</label>
-                <input type="number" id="cementQuantity" value="80" min="0" step="0.1">
+                <input type="number" id="cementQuantity" value="0" min="0" step="0.1">
             </div>
             
             <div class="form-group">
                 <label for="travelTime">Temps estimé pour un trajet (minutes)</label>
-                <input type="number" id="travelTime" value="30" min="0">
+                <input type="number" id="travelTime" value="0" min="0">
             </div>
             
             <div class="form-group">
@@ -148,27 +148,27 @@
             <div class="results" id="results">
                 <div class="result-row">
                     <span class="result-label">Nombre de camions nécessaires:</span>
-                    <span class="result-value" id="truckCount">10</span>
+                    <span class="result-value" id="truckCount">0</span>
                 </div>
                 
                 <div class="result-row">
                     <span class="result-label">Temps pour un aller-retour complet (par camion):</span>
-                    <span class="result-value" id="roundTripTime">1:15</span>
+                    <span class="result-value" id="roundTripTime">0:00</span>
                 </div>
                 
                 <div class="result-row">
                     <span class="result-label">Heure de chargement du premier camion:</span>
-                    <span class="result-value" id="firstLoadingTime">5:45</span>
+                    <span class="result-value" id="firstLoadingTime">0:00</span>
                 </div>
                 
                 <div class="result-row">
                     <span class="result-label">Durée totale de l'opération:</span>
-                    <span class="result-value" id="totalOperationTime">3:30</span>
+                    <span class="result-value" id="totalOperationTime">0:00</span>
                 </div>
                 
                 <div class="result-row">
                     <span class="result-label">Heure estimée de fin des travaux:</span>
-                    <span class="result-value" id="estimatedEndTime">10:30</span>
+                    <span class="result-value" id="estimatedEndTime">00:00</span>
                 </div>
                 
                 <h3>Détail des camions</h3>
